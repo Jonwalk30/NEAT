@@ -1,6 +1,6 @@
 import java.util.*;
 import javax.imageio.ImageIO;
-
+ 
 public class Test {
 
   public static void main(String[] args) {
