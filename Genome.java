@@ -1,5 +1,5 @@
 import java.util.*;
- 
+
 /*
 
 With help from:
@@ -41,11 +41,11 @@ public class Genome {
   }
 
   public void addNodeGene(NodeGene gene) {
-    this.nodes.put(gene.getId(), gene);
+    this.nodes.put(gene.getInnovationNumber(), gene);
   }
 
   // Adds a new node by splitting an existing connection
-  public void addNodeMutation(Random r, InnovationGenerator innovation) {
+  public void addNodeMutation(Random r, EvolutionTracker nodeInnovation , EvolutionTracker conInnovation) {
     ConnectionGene connection = connections.get(r.nextInt(connections.size()));
 
     NodeGene inNode = nodes.get(connection.getInNode());
@@ -53,18 +53,18 @@ public class Genome {
 
     connection.disable();
 
-    NodeGene newNode = new NodeGene(NodeGene.TYPE.HIDDEN, nodes.size());
-    ConnectionGene inToNew = new ConnectionGene(inNode.getId(), newNode.getId(), 1f, true, innovation.getInnovation());
-    ConnectionGene newToOut = new ConnectionGene(newNode.getId(), outNode.getId(), connection.getWeight(), true, innovation.getInnovation());
+    NodeGene newNode = new NodeGene(NodeGene.TYPE.HIDDEN, nodeInnovation.getInnovation());
+    ConnectionGene inToNew = new ConnectionGene(inNode.getInnovationNumber(), newNode.getInnovationNumber(), 1f, true, conInnovation.getInnovation());
+    ConnectionGene newToOut = new ConnectionGene(newNode.getInnovationNumber(), outNode.getInnovationNumber(), connection.getWeight(), true, conInnovation.getInnovation());
 
-    nodes.put(newNode.getId(), newNode);
+    nodes.put(newNode.getInnovationNumber(), newNode);
     connections.put(inToNew.getInnovationNumber(), inToNew);
     connections.put(newToOut.getInnovationNumber(), newToOut);
 
   }
 
   // Adds a new connection between two random nodes (See mutation (2) above)
-  public void addConnectionMutation(Random r, InnovationGenerator innovation) {
+  public void addConnectionMutation(Random r, EvolutionTracker innovation) {
 
     int attempts = 0;
     boolean success = false;
@@ -89,9 +89,9 @@ public class Genome {
       }
 
       // If the connection doesn't already exist
-      if(!connectionExists(node1, node2)) {
+      if(!connectionExists(node1, node2) && node1.getInnovationNumber() != node2.getInnovationNumber()) {
         // Make a new one and add it to the list
-        ConnectionGene newConnection = new ConnectionGene(node1.getId(), node2.getId(), weight, true, innovation.getInnovation());
+        ConnectionGene newConnection = new ConnectionGene(node1.getInnovationNumber(), node2.getInnovationNumber(), weight, true, innovation.getInnovation());
         connections.put(newConnection.getInnovationNumber(), newConnection);
         success = true;
       }
@@ -145,9 +145,9 @@ public class Genome {
   // Checks whether a connection already exists between two nodes
   private boolean connectionExists(NodeGene node1, NodeGene node2) {
     for (ConnectionGene con : connections.values()) {
-      if (con.getInNode() == node1.getId() && con.getOutNode() == node2.getId()) { // Exists
+      if (con.getInNode() == node1.getInnovationNumber() && con.getOutNode() == node2.getInnovationNumber()) { // Exists
         return true;
-      } else if (con.getInNode() == node2.getId() && con.getOutNode() == node1.getId()) { // Exists reversed
+      } else if (con.getInNode() == node2.getInnovationNumber() && con.getOutNode() == node1.getInnovationNumber()) { // Exists reversed
         return true;
       }
     }

@@ -1,8 +1,8 @@
-public class InnovationGenerator {
+public class EvolutionTracker {
 
   private int currentInnovation = 0;
 
-  public InnovationGenerator() {
+  public EvolutionTracker() {
     super();
   }
 

@@ -1,5 +1,5 @@
 import java.util.*;
- 
+
 public class NodeGene {
 
   enum TYPE {
@@ -10,24 +10,24 @@ public class NodeGene {
   }
 
   private TYPE type;
-  private int id;
+  private int innovationNumber;
 
-  public NodeGene(TYPE type, int id) {
+  public NodeGene(TYPE type, int innovationNumber) {
     super();
     this.type = type;
-    this.id = id;
+    this.innovationNumber = innovationNumber;
   }
 
   public TYPE getType() {
     return this.type;
   }
 
-  public int getId() {
-    return this.id;
+  public int getInnovationNumber() {
+    return this.innovationNumber;
   }
 
   public NodeGene copy() {
-    return new NodeGene(this.type, this.id);
+    return new NodeGene(this.type, this.innovationNumber);
   }
 
 }
