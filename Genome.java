@@ -21,19 +21,19 @@ public class Genome {
   private static float shiftAmplitude = 0.1f;
   private static float sigmoidModifier = 5.0f;
 
-  private Map<Integer, ConnectionGene> connections;
-  private Map<Integer, NodeGene> nodes;
+  private HashMap<Integer, ConnectionGene> connections;
+  private HashMap<Integer, NodeGene> nodes;
 
   public Genome() {
     this.connections = new HashMap<Integer, ConnectionGene>();
     this.nodes = new HashMap<Integer, NodeGene>();
   }
 
-  public Map<Integer, ConnectionGene> getConnectionGenes() {
+  public HashMap<Integer, ConnectionGene> getConnectionGenes() {
     return this.connections;
   }
 
-  public Map<Integer, NodeGene> getNodeGenes() {
+  public HashMap<Integer, NodeGene> getNodeGenes() {
     return this.nodes;
   }
 
@@ -47,7 +47,14 @@ public class Genome {
 
   // Adds a new node by splitting an existing connection
   public void addNodeMutation(Random r, EvolutionTracker nodeInnovation , EvolutionTracker conInnovation) {
-    ConnectionGene connection = connections.get(r.nextInt(connections.size()));
+    //ConnectionGene connection = connections.get(r.nextInt(connections.size()));
+
+    Collection<ConnectionGene> connectionsAsCollection = connections.values();
+    ArrayList<ConnectionGene> connectionsAsArrayList = new ArrayList<ConnectionGene>(connectionsAsCollection);
+
+    int r1 = r.nextInt(connectionsAsArrayList.size());
+
+    ConnectionGene connection = connectionsAsArrayList.get(r1);
 
     NodeGene inNode = nodes.get(connection.getInNode());
     NodeGene outNode = nodes.get(connection.getOutNode());
@@ -58,9 +65,13 @@ public class Genome {
     ConnectionGene inToNew = new ConnectionGene(inNode.getInnovationNumber(), newNode.getInnovationNumber(), 1f, true, conInnovation.getInnovation());
     ConnectionGene newToOut = new ConnectionGene(newNode.getInnovationNumber(), outNode.getInnovationNumber(), connection.getWeight(), true, conInnovation.getInnovation());
 
-    nodes.put(newNode.getInnovationNumber(), newNode);
-    connections.put(inToNew.getInnovationNumber(), inToNew);
-    connections.put(newToOut.getInnovationNumber(), newToOut);
+    addNodeGene(newNode);
+    addConnectionGene(inToNew);
+    addConnectionGene(newToOut);
+
+    //nodes.put(newNode.getInnovationNumber(), newNode);
+    //connections.put(inToNew.getInnovationNumber(), inToNew);
+    //connections.put(newToOut.getInnovationNumber(), newToOut);
 
   }
 
@@ -75,8 +86,14 @@ public class Genome {
       attempts++;
 
       // Pick two random nodes
-      NodeGene node1 = nodes.get(r.nextInt(nodes.size()));
-      NodeGene node2 = nodes.get(r.nextInt(nodes.size()));
+      Collection<NodeGene> nodesAsCollection = nodes.values();
+      ArrayList<NodeGene> nodesAsArrayList = new ArrayList<NodeGene>(nodesAsCollection);
+
+      int r1 = r.nextInt(nodesAsArrayList.size());
+      int r2 = r.nextInt(nodesAsArrayList.size());
+
+      NodeGene node1 = nodesAsArrayList.get(r1);
+      NodeGene node2 = nodesAsArrayList.get(r2);
 
       // Pick a random weight s.t. -1 <= weight <= 1
       float weight = (r.nextFloat() * 2f) - 1f;
@@ -93,7 +110,8 @@ public class Genome {
       if(!connectionExists(node1, node2) && node1.getInnovationNumber() != node2.getInnovationNumber()) {
         // Make a new one and add it to the list
         ConnectionGene newConnection = new ConnectionGene(node1.getInnovationNumber(), node2.getInnovationNumber(), weight, true, innovation.getInnovation());
-        connections.put(newConnection.getInnovationNumber(), newConnection);
+        addConnectionGene(newConnection);
+        //connections.put(newConnection.getInnovationNumber(), newConnection);
         success = true;
       }
     }

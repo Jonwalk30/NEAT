@@ -13,7 +13,6 @@ public class NodeGene {
   private int innovationNumber;
 
   public NodeGene(TYPE type, int innovationNumber) {
-    super();
     this.type = type;
     this.innovationNumber = innovationNumber;
   }

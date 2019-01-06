@@ -199,13 +199,13 @@ public class NEAT {
     for (int member = 0; member < memberCnt; member++) {
       Agent agent = new Agent();
       for (int i = 0; i < inputNodes.size(); i++) {
-        agent.getGenome().addNodeGene(inputNodes.get(i).copy());
+        agent.getGenome().addNodeGene(inputNodes.get(i));
       }
       for (int i = 0; i < outputNodes.size(); i++) {
-        agent.getGenome().addNodeGene(outputNodes.get(i).copy());
+        agent.getGenome().addNodeGene(outputNodes.get(i));
       }
       for (int i = 0; i < connections.size(); i++) {
-        agent.getGenome().addConnectionGene(connections.get(i).copy());
+        agent.getGenome().addConnectionGene(connections.get(i));
       }
       agents.add(agent);
     }
