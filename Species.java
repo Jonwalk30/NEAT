@@ -5,7 +5,7 @@ public class Species implements CompatibilityDistanceCalculator {
   // See http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf on determining species
   private static float c1 = 1f;
   private static float c2 = 1f;
-  private static float c3 = 0.4f;
+  private static float c3 = 1f;
 
   // Compatibility Distance Cutoff
   private static float delta = 3.0f;
@@ -49,19 +49,25 @@ public class Species implements CompatibilityDistanceCalculator {
     }
 
     int D = disjointGeneCount(a1.getGenome(), a2.getGenome());
-
     int E = excessGeneCount(a1.getGenome(), a2.getGenome());
-
     float W = averageWeightDifference(a1.getGenome(), a2.getGenome());
-
     int N = genomeSize(a1.getGenome());
-
     float compatibilityDifference = (c1 * (float) E) / ((float) N) + (c2 * (float) D) / ((float) N) + (c3*W);
 
     System.out.println(compatibilityDifference);
 
     return compatibilityDifference < delta;
 
+  }
+
+  public Agent getStrongestMember() {
+    Agent bestAgent = new Agent();
+    for (Agent a : this.members) {
+      if (a.getFitness() > bestAgent.getFitness()) {
+        bestAgent = a;
+      }
+    }
+    return bestAgent;
   }
 
 }

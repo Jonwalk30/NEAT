@@ -7,8 +7,16 @@ public class Test {
 
     Random r = new Random();
 
-    NEAT test = new NEAT(3, 2, 1);
-// 
+    NEAT test = new NEAT(5, 2, 1);
+
+    for (int i = 0; i < 100; i++) {
+      for (Agent a : test.getAgents()) {
+        // TODO: Deal with edge cases like a non-float fitness
+        a.setFitness(r.nextFloat());
+      }
+      test.generateNextGeneration();
+    }
+//
 //     EvolutionTracker nodeInnovation = new EvolutionTracker();
 //     EvolutionTracker conInnovation = new EvolutionTracker();
 //

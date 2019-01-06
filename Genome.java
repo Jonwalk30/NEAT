@@ -19,6 +19,7 @@ public class Genome {
 
   private static int maxAttempts = 10000;
   private static float shiftAmplitude = 0.1f;
+  private static float sigmoidModifier = 5.0f;
 
   private Map<Integer, ConnectionGene> connections;
   private Map<Integer, NodeGene> nodes;
@@ -124,9 +125,14 @@ public class Genome {
   }
 
   // Flips whether a connection in on or off (See (5) above)
-  // public void flipConnectionMutation() {
-  //
-  // }
+  public void flipConnectionMutation(Random r) {
+    ConnectionGene connection = connections.get(r.nextInt(connections.size()));
+    if (connection.isExpressed()) {
+      connection.disable();
+    } else {
+      connection.enable();
+    }
+  }
 
   // Checks whether a connection between two genes should be reversed
   public boolean shouldReverse(NodeGene node1, NodeGene node2) {
@@ -194,6 +200,14 @@ public class Genome {
     return child;
 
   }
+
+  // TODO: Be able to calculate outputs, given inputs
+  // public ArrayList<float> calculateOutputs(ArrayList<float> inputs) {
+  //   ArrayList<float> forNow = new ArrayList<float>();
+  //   Random r = new Random();
+  //   forNow.add(r.nextFloat());
+  //   return forNow;
+  // }
 
   public Genome copy() {
     Genome g = new Genome();

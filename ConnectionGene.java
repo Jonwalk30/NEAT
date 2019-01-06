@@ -1,5 +1,5 @@
 import java.util.*;
- 
+
 public class ConnectionGene {
 
   private int inNode;
