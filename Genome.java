@@ -195,4 +195,15 @@ public class Genome {
 
   }
 
+  public Genome copy() {
+    Genome g = new Genome();
+    for (NodeGene node : this.nodes.values()) {
+      g.addNodeGene(node.copy());
+    }
+    for (ConnectionGene con : this.connections.values()) {
+      g.addConnectionGene(con.copy());
+    }
+    return g;
+  }
+
 }

@@ -7,32 +7,11 @@ public class Test {
 
     Random r = new Random();
 
-    EvolutionTracker nodeInnovation = new EvolutionTracker();
-    EvolutionTracker conInnovation = new EvolutionTracker();
-
-    Genome genome = new Genome();
-
-    genome.addNodeGene(new NodeGene(NodeGene.TYPE.INPUT, nodeInnovation.getInnovation()));
-    genome.addNodeGene(new NodeGene(NodeGene.TYPE.INPUT, nodeInnovation.getInnovation()));
-    genome.addNodeGene(new NodeGene(NodeGene.TYPE.OUTPUT, nodeInnovation.getInnovation()));
-
-    genome.addConnectionGene(new ConnectionGene(0, 2, 0.5f, true, conInnovation.getInnovation()));
-    genome.addConnectionGene(new ConnectionGene(1, 2, 0.5f, true, conInnovation.getInnovation()));
-    genome.addConnectionGene(new ConnectionGene(0, 1, 0.5f, true, conInnovation.getInnovation()));
-
-    printGenome(genome);
-
-    genome.weightMutation(r, 0.5f);
-
-    genome.addNodeMutation(r, nodeInnovation, conInnovation);
-
-    genome.addConnectionMutation(r, conInnovation);
-
-    printGenome(genome);
+    NEAT test = new NEAT(3, 10, 2, 1);
 
   }
 
-  private static void printGenome(Genome genome) {
+  public static void printGenome(Genome genome) {
     System.out.println("");
     System.out.println("Nodes:");
     for (NodeGene node : genome.getNodeGenes().values()) {
