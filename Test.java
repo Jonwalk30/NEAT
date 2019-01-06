@@ -7,7 +7,7 @@ public class Test {
 
     Random r = new Random();
 
-    NEAT test = new NEAT(3, 10, 2, 1);
+    NEAT test = new NEAT(3, 2, 1);
 
   }
 

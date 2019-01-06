@@ -26,4 +26,11 @@ public class Agent {
     return this.genome;
   }
 
+  public Agent copy() {
+    Agent a = new Agent();
+    a.genome = this.genome.copy();
+    a.fitness = this.fitness;
+    return a;
+  }
+
 }
