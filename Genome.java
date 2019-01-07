@@ -15,6 +15,8 @@ With help from:
   (5) Turn connection on/off
 
 */
+
+// TODO: Prevent explosion of innovation numbers by keeping track of whether a connection / node has already been added
 public class Genome {
 
   private static int maxAttempts = 10000;
@@ -46,7 +48,15 @@ public class Genome {
   }
 
   // Adds a new node by splitting an existing connection
-  public void addNodeMutation(Random r, EvolutionTracker nodeInnovation , EvolutionTracker conInnovation) {
+  // TODO: Can squares happen? If so we in troubleeee
+  // i.e. can...
+  //      O
+  //     / \
+  //    O  O
+  //     \/
+  //     O
+  // ever exist?
+  public void addNodeMutation(Random r, EvolutionTracker nodeInnovation , EvolutionTracker conInnovation, ArrayList<ConnectionGene> allConnectionGenes) {
     //ConnectionGene connection = connections.get(r.nextInt(connections.size()));
 
     Collection<ConnectionGene> connectionsAsCollection = connections.values();
@@ -59,11 +69,55 @@ public class Genome {
     NodeGene inNode = nodes.get(connection.getInNode());
     NodeGene outNode = nodes.get(connection.getOutNode());
 
+    //System.out.println("Trying to add a node on connection " + connection.getInnovationNumber());
+
     connection.disable();
 
-    NodeGene newNode = new NodeGene(NodeGene.TYPE.HIDDEN, nodeInnovation.getInnovation());
-    ConnectionGene inToNew = new ConnectionGene(inNode.getInnovationNumber(), newNode.getInnovationNumber(), 1f, true, conInnovation.getInnovation());
-    ConnectionGene newToOut = new ConnectionGene(newNode.getInnovationNumber(), outNode.getInnovationNumber(), connection.getWeight(), true, conInnovation.getInnovation());
+    boolean isANewNode = true;
+    Integer newNodeInnovationNumber = 0;
+    Integer inConInnovationNumber = 0;
+    Integer outConInnovationNumber = 0;
+
+    if (allConnectionGenes != null) {
+      ArrayList<ConnectionGene> possibleInputCons = new ArrayList<ConnectionGene>();
+      ArrayList<ConnectionGene> possibleOutputCons = new ArrayList<ConnectionGene>();
+      for (ConnectionGene con : allConnectionGenes) {
+        if (con.getInNode() == inNode.getInnovationNumber()) {
+          possibleInputCons.add(con);
+        }
+      }
+      for (ConnectionGene inCon : possibleInputCons) {
+        //System.out.println("PossInputCon = " + inCon.getInnovationNumber());
+      }
+      for (ConnectionGene con : allConnectionGenes) {
+        if (con.getOutNode() == outNode.getInnovationNumber()) {
+          possibleOutputCons.add(con);
+        }
+      }
+      for (ConnectionGene outCon : possibleOutputCons) {
+        //System.out.println("PossOutputCon = " + outCon.getInnovationNumber());
+      }
+      for (ConnectionGene inCon : possibleInputCons) {
+        for (ConnectionGene outCon : possibleOutputCons) {
+          if (inCon.getOutNode() == outCon.getInNode()) {
+            isANewNode = false;
+            newNodeInnovationNumber = inCon.getOutNode();
+            inConInnovationNumber = inCon.getInnovationNumber();
+            outConInnovationNumber = outCon.getInnovationNumber();
+          }
+        }
+      }
+    }
+
+    if (isANewNode) {
+      newNodeInnovationNumber = nodeInnovation.getInnovation();
+      inConInnovationNumber = conInnovation.getInnovation();
+      outConInnovationNumber = conInnovation.getInnovation();
+    }
+
+    NodeGene newNode = new NodeGene(NodeGene.TYPE.HIDDEN, newNodeInnovationNumber);
+    ConnectionGene inToNew = new ConnectionGene(inNode.getInnovationNumber(), newNode.getInnovationNumber(), 1f, true, inConInnovationNumber);
+    ConnectionGene newToOut = new ConnectionGene(newNode.getInnovationNumber(), outNode.getInnovationNumber(), connection.getWeight(), true, outConInnovationNumber);
 
     addNodeGene(newNode);
     addConnectionGene(inToNew);
@@ -76,7 +130,7 @@ public class Genome {
   }
 
   // Adds a new connection between two random nodes (See mutation (2) above)
-  public void addConnectionMutation(Random r, EvolutionTracker innovation) {
+  public void addConnectionMutation(Random r, EvolutionTracker innovation, ArrayList<ConnectionGene> allConnectionGenes) {
 
     int attempts = 0;
     boolean success = false;
@@ -107,9 +161,29 @@ public class Genome {
       }
 
       // If the connection doesn't already exist
-      if(!connectionExists(node1, node2) && node1.getInnovationNumber() != node2.getInnovationNumber()) {
+      if(!connectionExists(node1, node2)
+        && node1.getInnovationNumber() != node2.getInnovationNumber()
+        && (node1.getType() != NodeGene.TYPE.INPUT || node2.getType() != NodeGene.TYPE.INPUT)) {
+
+        Integer newConInnovationNumber = 0;
+        boolean isANewCon = true;
+
+        for (ConnectionGene con : allConnectionGenes) {
+          if (con.getInNode() == node1.getInnovationNumber() && con.getOutNode() == node2.getInnovationNumber()) { // Exists
+            isANewCon = false;
+            newConInnovationNumber = con.getInnovationNumber();
+          } else if (con.getInNode() == node2.getInnovationNumber() && con.getOutNode() == node1.getInnovationNumber()) { // Exists reversed
+            isANewCon = false;
+            newConInnovationNumber = con.getInnovationNumber();
+          }
+        }
+
+        if (isANewCon) {
+          newConInnovationNumber = innovation.getInnovation();
+        }
+
         // Make a new one and add it to the list
-        ConnectionGene newConnection = new ConnectionGene(node1.getInnovationNumber(), node2.getInnovationNumber(), weight, true, innovation.getInnovation());
+        ConnectionGene newConnection = new ConnectionGene(node1.getInnovationNumber(), node2.getInnovationNumber(), weight, true, newConInnovationNumber);
         addConnectionGene(newConnection);
         //connections.put(newConnection.getInnovationNumber(), newConnection);
         success = true;
@@ -185,8 +259,7 @@ public class Genome {
 
     // Add the nodes from the fitter parent to the child
     for (NodeGene node : parent1.getNodeGenes().values()) {
-      child.addNodeGene(node
-      .copy());
+      child.addNodeGene(node.copy());
     }
 
     // Add the connections from the appropriate parent to the child

@@ -10,6 +10,7 @@ public class Test {
     NEAT test = new NEAT(100, 2, 1);
 
     for (int i = 0; i < 100; i++) {
+      System.out.println("Generation " + (i+1));
       for (Agent a : test.getAgents()) {
         // TODO: Deal with edge cases like a non-float fitness
         a.setFitness(r.nextFloat());

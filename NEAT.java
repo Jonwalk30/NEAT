@@ -2,14 +2,15 @@ import java.util.*;
 
 
 // TODO: Inter-species mating 0.001 chance
+// TODO: Create a variable to return all of the nodes and connections of the Agents
 public class NEAT {
 
   private static float interSpeciesMating = 0.001f;
   private static float weightMutationProb = 0.8f;
   private static float shiftMutationProb = 0.9f;
   private static float flipMutationProb = 0.01f;
-  private static float newNodeMutationProb = 0.03f;
-  private static float newConnectionMutationProb = 0.05f;
+  private static float newNodeMutationProb = 0.03f;  //0.03
+  private static float newConnectionMutationProb = 0.05f;  //0.05
 
   private Integer memberCnt;
   private ArrayList<Species> generation;
@@ -73,10 +74,10 @@ public class NEAT {
         a.getGenome().weightMutation(r, shiftMutationProb);
       }
       if (r.nextFloat() < newNodeMutationProb) {
-        a.getGenome().addNodeMutation(r, nodeInnovationNumber, connectionInnovationNumber);
+        a.getGenome().addNodeMutation(r, nodeInnovationNumber, connectionInnovationNumber, this.getAllConnectionGenes());
       }
       if (r.nextFloat() < newConnectionMutationProb) {
-        a.getGenome().addConnectionMutation(r, connectionInnovationNumber);
+        a.getGenome().addConnectionMutation(r, connectionInnovationNumber, this.getAllConnectionGenes());
       }
       // TODO: Flip mutation somehow
     }
@@ -89,6 +90,7 @@ public class NEAT {
     previousGenerations.add(this.generation);
 
     this.generation = nextGen;
+    //System.out.println("Hello");
     printGeneration();
   }
 
@@ -138,6 +140,9 @@ public class NEAT {
   // but the mascot from the last generation (randomly assigned before)
   // is used to determine who joins in this generation
   private ArrayList<Species> placeIntoSpecies(ArrayList<Agent> agents) {
+
+    // Just so the same agents aren't always the mascots
+    Collections.shuffle(agents);
 
     ArrayList<Species> generation = new ArrayList<Species>();
     Species startingSpecies = new Species();
@@ -238,6 +243,26 @@ public class NEAT {
     }
   }
 
+  public ArrayList<ConnectionGene> getAllConnectionGenes() {
+    ArrayList<ConnectionGene> genes = new ArrayList<ConnectionGene>();
+    for (Agent a  : this.getAgents()) {
+      for (ConnectionGene g : a.getGenome().getConnectionGenes().values()) {
+        genes.add(g);
+      }
+    }
+    return genes;
+  }
+
+  public ArrayList<NodeGene> getAllNodeGenes() {
+    ArrayList<NodeGene> genes = new ArrayList<NodeGene>();
+    for (Agent a  : this.getAgents()) {
+      for (NodeGene g : a.getGenome().getNodeGenes().values()) {
+        genes.add(g);
+      }
+    }
+    return genes;
+  }
+
   public Genome getBestGenome() {
     Agent bestAgent = new Agent();
     for (Agent a : getAgents()) {
@@ -246,6 +271,16 @@ public class NEAT {
       }
     }
     return bestAgent.getGenome();
+  }
+
+  public void printBestGenome() {
+    Agent bestAgent = new Agent();
+    for (Agent a : getAgents()) {
+      if (a.getFitness() > bestAgent.getFitness()) {
+        bestAgent = a;
+      }
+    }
+    Test.printGenome(bestAgent.getGenome());
   }
 
   public float getMaxFitness() {

@@ -54,7 +54,7 @@ public class Species implements CompatibilityDistanceCalculator {
     int N = genomeSize(a1.getGenome());
     float compatibilityDifference = (c1 * (float) E) / ((float) N) + (c2 * (float) D) / ((float) N) + (c3*W);
 
-    System.out.println(compatibilityDifference);
+    //System.out.println(compatibilityDifference);
 
     return compatibilityDifference < delta;
 
