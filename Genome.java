@@ -15,24 +15,27 @@ With help from:
   (5) Turn connection on/off
 
 */
+
+// TODO: Prevent explosion of innovation numbers by keeping track of whether a connection / node has already been added
 public class Genome {
 
   private static int maxAttempts = 10000;
   private static float shiftAmplitude = 0.1f;
+  private static float sigmoidModifier = 5.0f;
 
-  private Map<Integer, ConnectionGene> connections;
-  private Map<Integer, NodeGene> nodes;
+  private HashMap<Integer, ConnectionGene> connections;
+  private HashMap<Integer, NodeGene> nodes;
 
   public Genome() {
     this.connections = new HashMap<Integer, ConnectionGene>();
     this.nodes = new HashMap<Integer, NodeGene>();
   }
 
-  public Map<Integer, ConnectionGene> getConnectionGenes() {
+  public HashMap<Integer, ConnectionGene> getConnectionGenes() {
     return this.connections;
   }
 
-  public Map<Integer, NodeGene> getNodeGenes() {
+  public HashMap<Integer, NodeGene> getNodeGenes() {
     return this.nodes;
   }
 
@@ -45,26 +48,89 @@ public class Genome {
   }
 
   // Adds a new node by splitting an existing connection
-  public void addNodeMutation(Random r, EvolutionTracker nodeInnovation , EvolutionTracker conInnovation) {
-    ConnectionGene connection = connections.get(r.nextInt(connections.size()));
+  // TODO: Can squares happen? If so we in troubleeee
+  // i.e. can...
+  //      O
+  //     / \
+  //    O  O
+  //     \/
+  //     O
+  // ever exist?
+  public void addNodeMutation(Random r, EvolutionTracker nodeInnovation , EvolutionTracker conInnovation, ArrayList<ConnectionGene> allConnectionGenes) {
+    //ConnectionGene connection = connections.get(r.nextInt(connections.size()));
+
+    Collection<ConnectionGene> connectionsAsCollection = connections.values();
+    ArrayList<ConnectionGene> connectionsAsArrayList = new ArrayList<ConnectionGene>(connectionsAsCollection);
+
+    int r1 = r.nextInt(connectionsAsArrayList.size());
+
+    ConnectionGene connection = connectionsAsArrayList.get(r1);
 
     NodeGene inNode = nodes.get(connection.getInNode());
     NodeGene outNode = nodes.get(connection.getOutNode());
 
+    //System.out.println("Trying to add a node on connection " + connection.getInnovationNumber());
+
     connection.disable();
 
-    NodeGene newNode = new NodeGene(NodeGene.TYPE.HIDDEN, nodeInnovation.getInnovation());
-    ConnectionGene inToNew = new ConnectionGene(inNode.getInnovationNumber(), newNode.getInnovationNumber(), 1f, true, conInnovation.getInnovation());
-    ConnectionGene newToOut = new ConnectionGene(newNode.getInnovationNumber(), outNode.getInnovationNumber(), connection.getWeight(), true, conInnovation.getInnovation());
+    boolean isANewNode = true;
+    Integer newNodeInnovationNumber = 0;
+    Integer inConInnovationNumber = 0;
+    Integer outConInnovationNumber = 0;
 
-    nodes.put(newNode.getInnovationNumber(), newNode);
-    connections.put(inToNew.getInnovationNumber(), inToNew);
-    connections.put(newToOut.getInnovationNumber(), newToOut);
+    if (allConnectionGenes != null) {
+      ArrayList<ConnectionGene> possibleInputCons = new ArrayList<ConnectionGene>();
+      ArrayList<ConnectionGene> possibleOutputCons = new ArrayList<ConnectionGene>();
+      for (ConnectionGene con : allConnectionGenes) {
+        if (con.getInNode() == inNode.getInnovationNumber()) {
+          possibleInputCons.add(con);
+        }
+      }
+      for (ConnectionGene inCon : possibleInputCons) {
+        //System.out.println("PossInputCon = " + inCon.getInnovationNumber());
+      }
+      for (ConnectionGene con : allConnectionGenes) {
+        if (con.getOutNode() == outNode.getInnovationNumber()) {
+          possibleOutputCons.add(con);
+        }
+      }
+      for (ConnectionGene outCon : possibleOutputCons) {
+        //System.out.println("PossOutputCon = " + outCon.getInnovationNumber());
+      }
+      for (ConnectionGene inCon : possibleInputCons) {
+        for (ConnectionGene outCon : possibleOutputCons) {
+          if (inCon.getOutNode() == outCon.getInNode()) {
+            isANewNode = false;
+            newNodeInnovationNumber = inCon.getOutNode();
+            inConInnovationNumber = inCon.getInnovationNumber();
+            outConInnovationNumber = outCon.getInnovationNumber();
+          }
+        }
+      }
+    }
+
+    if (isANewNode) {
+      newNodeInnovationNumber = nodeInnovation.getInnovation();
+      inConInnovationNumber = conInnovation.getInnovation();
+      outConInnovationNumber = conInnovation.getInnovation();
+    }
+
+    NodeGene newNode = new NodeGene(NodeGene.TYPE.HIDDEN, newNodeInnovationNumber);
+    ConnectionGene inToNew = new ConnectionGene(inNode.getInnovationNumber(), newNode.getInnovationNumber(), 1f, true, inConInnovationNumber);
+    ConnectionGene newToOut = new ConnectionGene(newNode.getInnovationNumber(), outNode.getInnovationNumber(), connection.getWeight(), true, outConInnovationNumber);
+
+    addNodeGene(newNode);
+    addConnectionGene(inToNew);
+    addConnectionGene(newToOut);
+
+    //nodes.put(newNode.getInnovationNumber(), newNode);
+    //connections.put(inToNew.getInnovationNumber(), inToNew);
+    //connections.put(newToOut.getInnovationNumber(), newToOut);
 
   }
 
   // Adds a new connection between two random nodes (See mutation (2) above)
-  public void addConnectionMutation(Random r, EvolutionTracker innovation) {
+  public void addConnectionMutation(Random r, EvolutionTracker innovation, ArrayList<ConnectionGene> allConnectionGenes) {
 
     int attempts = 0;
     boolean success = false;
@@ -74,8 +140,14 @@ public class Genome {
       attempts++;
 
       // Pick two random nodes
-      NodeGene node1 = nodes.get(r.nextInt(nodes.size()));
-      NodeGene node2 = nodes.get(r.nextInt(nodes.size()));
+      Collection<NodeGene> nodesAsCollection = nodes.values();
+      ArrayList<NodeGene> nodesAsArrayList = new ArrayList<NodeGene>(nodesAsCollection);
+
+      int r1 = r.nextInt(nodesAsArrayList.size());
+      int r2 = r.nextInt(nodesAsArrayList.size());
+
+      NodeGene node1 = nodesAsArrayList.get(r1);
+      NodeGene node2 = nodesAsArrayList.get(r2);
 
       // Pick a random weight s.t. -1 <= weight <= 1
       float weight = (r.nextFloat() * 2f) - 1f;
@@ -89,10 +161,31 @@ public class Genome {
       }
 
       // If the connection doesn't already exist
-      if(!connectionExists(node1, node2) && node1.getInnovationNumber() != node2.getInnovationNumber()) {
+      if(!connectionExists(node1, node2)
+        && node1.getInnovationNumber() != node2.getInnovationNumber()
+        && (node1.getType() != NodeGene.TYPE.INPUT || node2.getType() != NodeGene.TYPE.INPUT)) {
+
+        Integer newConInnovationNumber = 0;
+        boolean isANewCon = true;
+
+        for (ConnectionGene con : allConnectionGenes) {
+          if (con.getInNode() == node1.getInnovationNumber() && con.getOutNode() == node2.getInnovationNumber()) { // Exists
+            isANewCon = false;
+            newConInnovationNumber = con.getInnovationNumber();
+          } else if (con.getInNode() == node2.getInnovationNumber() && con.getOutNode() == node1.getInnovationNumber()) { // Exists reversed
+            isANewCon = false;
+            newConInnovationNumber = con.getInnovationNumber();
+          }
+        }
+
+        if (isANewCon) {
+          newConInnovationNumber = innovation.getInnovation();
+        }
+
         // Make a new one and add it to the list
-        ConnectionGene newConnection = new ConnectionGene(node1.getInnovationNumber(), node2.getInnovationNumber(), weight, true, innovation.getInnovation());
-        connections.put(newConnection.getInnovationNumber(), newConnection);
+        ConnectionGene newConnection = new ConnectionGene(node1.getInnovationNumber(), node2.getInnovationNumber(), weight, true, newConInnovationNumber);
+        addConnectionGene(newConnection);
+        //connections.put(newConnection.getInnovationNumber(), newConnection);
         success = true;
       }
     }
@@ -124,9 +217,14 @@ public class Genome {
   }
 
   // Flips whether a connection in on or off (See (5) above)
-  // public void flipConnectionMutation() {
-  //
-  // }
+  public void flipConnectionMutation(Random r) {
+    ConnectionGene connection = connections.get(r.nextInt(connections.size()));
+    if (connection.isExpressed()) {
+      connection.disable();
+    } else {
+      connection.enable();
+    }
+  }
 
   // Checks whether a connection between two genes should be reversed
   public boolean shouldReverse(NodeGene node1, NodeGene node2) {
@@ -161,8 +259,7 @@ public class Genome {
 
     // Add the nodes from the fitter parent to the child
     for (NodeGene node : parent1.getNodeGenes().values()) {
-      child.addNodeGene(node
-      .copy());
+      child.addNodeGene(node.copy());
     }
 
     // Add the connections from the appropriate parent to the child
@@ -193,6 +290,25 @@ public class Genome {
     }
     return child;
 
+  }
+
+  // TODO: Be able to calculate outputs, given inputs
+  // public ArrayList<float> calculateOutputs(ArrayList<float> inputs) {
+  //   ArrayList<float> forNow = new ArrayList<float>();
+  //   Random r = new Random();
+  //   forNow.add(r.nextFloat());
+  //   return forNow;
+  // }
+
+  public Genome copy() {
+    Genome g = new Genome();
+    for (NodeGene node : this.nodes.values()) {
+      g.addNodeGene(node.copy());
+    }
+    for (ConnectionGene con : this.connections.values()) {
+      g.addConnectionGene(con.copy());
+    }
+    return g;
   }
 
 }

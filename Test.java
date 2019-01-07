@@ -7,32 +7,66 @@ public class Test {
 
     Random r = new Random();
 
-    EvolutionTracker nodeInnovation = new EvolutionTracker();
-    EvolutionTracker conInnovation = new EvolutionTracker();
+    NEAT test = new NEAT(100, 2, 1);
 
-    Genome genome = new Genome();
-
-    genome.addNodeGene(new NodeGene(NodeGene.TYPE.INPUT, nodeInnovation.getInnovation()));
-    genome.addNodeGene(new NodeGene(NodeGene.TYPE.INPUT, nodeInnovation.getInnovation()));
-    genome.addNodeGene(new NodeGene(NodeGene.TYPE.OUTPUT, nodeInnovation.getInnovation()));
-
-    genome.addConnectionGene(new ConnectionGene(0, 2, 0.5f, true, conInnovation.getInnovation()));
-    genome.addConnectionGene(new ConnectionGene(1, 2, 0.5f, true, conInnovation.getInnovation()));
-    genome.addConnectionGene(new ConnectionGene(0, 1, 0.5f, true, conInnovation.getInnovation()));
-
-    printGenome(genome);
-
-    genome.weightMutation(r, 0.5f);
-
-    genome.addNodeMutation(r, nodeInnovation, conInnovation);
-
-    genome.addConnectionMutation(r, conInnovation);
-
-    printGenome(genome);
+    for (int i = 0; i < 100; i++) {
+      System.out.println("Generation " + (i+1));
+      for (Agent a : test.getAgents()) {
+        // TODO: Deal with edge cases like a non-float fitness
+        a.setFitness(r.nextFloat());
+      }
+      test.generateNextGeneration();
+    }
+//
+//     EvolutionTracker nodeInnovation = new EvolutionTracker();
+//     EvolutionTracker conInnovation = new EvolutionTracker();
+//
+//     Genome genome = new Genome();
+//
+//     genome.addNodeGene(new NodeGene(NodeGene.TYPE.INPUT, nodeInnovation.getInnovation()));
+//     genome.addNodeGene(new NodeGene(NodeGene.TYPE.INPUT, nodeInnovation.getInnovation()));
+// //    genome.addNodeGene(new NodeGene(NodeGene.TYPE.INPUT, nodeInnovation.getInnovation()));
+//     genome.addNodeGene(new NodeGene(NodeGene.TYPE.OUTPUT, nodeInnovation.getInnovation()));
+//
+//     genome.addConnectionGene(new ConnectionGene(0, 2, 0.5f, true, conInnovation.getInnovation()));
+//     genome.addConnectionGene(new ConnectionGene(1, 2, 0.5f, true, conInnovation.getInnovation()));
+//     //genome.addConnectionGene(new ConnectionGene(0, 1, 0.5f, true, conInnovation.getInnovation()));
+//
+//     printGenome(genome);
+//
+//     Genome genome1 = genome.copy();
+//     Genome genome2 = genome.copy();
+//
+//      //genome1.weightMutation(r, 0.5f);
+//      //genome1.weightMutation(r, 0.5f);
+//     // genome2.weightMutation(r, 0.5f);
+//     // genome2.weightMutation(r, 0.5f);
+//
+//      genome1.addNodeMutation(r, nodeInnovation, conInnovation);
+//      //genome1.addNodeMutation(r, nodeInnovation, conInnovation);
+//      genome2.addNodeMutation(r, nodeInnovation, conInnovation);
+//      genome2.addNodeMutation(r, nodeInnovation, conInnovation);
+//      //genome2.addNodeMutation(r, nodeInnovation, conInnovation);
+//
+//     //genome1.addConnectionMutation(r, conInnovation);
+//     //genome2.addConnectionMutation(r, conInnovation);
+//
+//     //printGenome(genome1);
+//     //printGenome(genome2);
+//
+//     Agent a1 = new Agent();
+//     a1.setGenome(genome1);
+//     Agent a2 = new Agent();
+//     a2.setGenome(genome2);
+//
+//     Species s = new Species();
+//     s.setMascot(a1);
+//     //s.shouldContain(a1);
+//     //s.shouldContain(a2);
 
   }
 
-  private static void printGenome(Genome genome) {
+  public static void printGenome(Genome genome) {
     System.out.println("");
     System.out.println("Nodes:");
     for (NodeGene node : genome.getNodeGenes().values()) {

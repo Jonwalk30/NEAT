@@ -1,5 +1,5 @@
 import java.util.*;
- 
+
 public class ConnectionGene {
 
   private int inNode;
@@ -9,7 +9,6 @@ public class ConnectionGene {
   private int innovationNumber;
 
   public ConnectionGene(int inNode, int outNode, float weight, boolean expressed, int innovationNumber) {
-    super();
     this.inNode = inNode;
     this.outNode = outNode;
     this.weight = weight;
