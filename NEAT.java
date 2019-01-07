@@ -91,7 +91,7 @@ public class NEAT {
 
     this.generation = nextGen;
     //System.out.println("Hello");
-    printGeneration();
+    //printGeneration();
   }
 
   private ArrayList<Species> generateFirstGeneration(Integer inputs, Integer outputs) {

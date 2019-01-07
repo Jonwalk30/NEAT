@@ -311,32 +311,42 @@ public class Genome {
       if (node.getType() == NodeGene.TYPE.INPUT) {
         // Set the node's value to input
         nodeValues.put(node.getInnovationNumber(), inputs.get(node.getInnovationNumber()));
+        //System.out.println("Found an input node with innovationNumber " + node.getInnovationNumber() + ", storing the first input in here");
+        //System.out.println("nodeValues: " + nodeValues);
       } else {
         // Sigmoid calculation
         float oldValue = nodeValues.get(node.getInnovationNumber());
         float newValue = (float) 1 / (float) (1 + Math.pow((double) Math.E, (double) (-sigmoidModifier * oldValue)));
         nodeValues.put(node.getInnovationNumber(), newValue);
+        //System.out.println("Using Sigmoid, calculated the value of the node with IN " + node.getInnovationNumber() + " to be " + newValue);
+        //System.out.println("nodeValues: " + nodeValues);
       }
       if (node.getType() == NodeGene.TYPE.OUTPUT) {
         // If the type is output, add its value to the output list
         outputValues.add(nodeValues.get(node.getInnovationNumber()));
+        //System.out.println("Found an output node with innovationNumber " + node.getInnovationNumber() + ", storing the first input in here");
+        //System.out.println("outputValues: " + outputValues);
       } else {
         for (ConnectionGene c : this.connections.values()) {
           // Check if the connection has the current node as an input
           if (c.getInNode() == node.getInnovationNumber()) {
+            //System.out.println("Found connection " + c.getInnovationNumber());
             // If so make the value of the output node equal to the value that we assigned to the input node * the weight
             // Also make the key equal to the innovationNumber of the node
             NodeGene toNode = nodes.get(c.getOutNode());
             //System.out.println(nodeValues);
             //System.out.println(toNode.getInnovationNumber());
             float value = nodeValues.get(toNode.getInnovationNumber());
-            value = value + (nodeValues.get(toNode.getInnovationNumber()) * c.getWeight());
+            //System.out.println("Doing calculation " + nodeValues.get(node.getInnovationNumber()) + " * " + c.getWeight());
+            value = value + (nodeValues.get(node.getInnovationNumber()) * c.getWeight());
             nodeValues.put(toNode.getInnovationNumber(), value);
+            //System.out.println("Calculated the value of the node with IN " + toNode.getInnovationNumber() + " to be " + value);
+            //System.out.println("nodeValues: " + nodeValues);
           }
         }
       }
     }
-    System.out.println(outputValues);
+    //System.out.println(outputValues);
     return outputValues;
   }
 

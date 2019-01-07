@@ -14,13 +14,13 @@ public class Test {
       System.out.println("Generation " + (i+1));
       for (Agent a : test.getAgents()) {
         // TODO: Deal with edge cases like a non-float fitness
-        float number1 = (float) r.nextInt(100);
-        float number2 = (float) r.nextInt(100);
+        float number1 = (float) 50 / 100; //r.nextInt(100)
+        float number2 = (float) 50 / 100;
         ArrayList<Float> inputs = new ArrayList<Float>();
         inputs.add(number1);
         inputs.add(number2);
         float output = a.getGenome().calculateOutputs(inputs).get(0)*200;
-        System.out.println("Added " + number1 + " and " + number2 + " and got " + output);
+        System.out.println("Added " + number1*100 + " and " + number2*100 + " and got " + output);
         a.setFitness(Math.abs((number1 + number2) - output));
         //a.setFitness(r.nextFloat());
       }
