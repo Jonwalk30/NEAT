@@ -21,7 +21,7 @@ With help from:
 public class Genome {
 
   private static int maxAttempts = 10000;
-  private static float shiftAmplitude = 0.1f;
+  private static float shiftAmplitude = 0.1f; // 0.1f
   private static float sigmoidModifier = 5.0f;
 
   private HashMap<Integer, ConnectionGene> connections;

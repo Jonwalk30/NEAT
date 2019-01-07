@@ -91,7 +91,7 @@ public class NEAT {
 
     this.generation = nextGen;
     //System.out.println("Hello");
-    //printGeneration();
+    printGeneration();
   }
 
   private ArrayList<Species> generateFirstGeneration(Integer inputs, Integer outputs) {
@@ -221,6 +221,7 @@ public class NEAT {
       for (ConnectionGene con : a.getGenome().getConnectionGenes().values()) {
         weight = (r.nextFloat() * 2f) - 1f;
         con.setWeight(weight);
+        //System.out.println(con.getWeight());
       }
     }
 
