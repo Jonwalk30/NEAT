@@ -10,6 +10,7 @@ public class Agent {
     this.fitness = 0;
   }
 
+  // TODO: Add NEAT as an input and adjust fitness based on the number of agents in the species
   public void setFitness(float fitness) {
     this.fitness = fitness;
   }
