@@ -38,13 +38,21 @@ public class NEAT {
     // Crossover
     for (Species s : this.generation) {
 
+      // System.out.println("Species: ");
+      // for (Agent a : s.getMembers()) {
+      //   Test.printGenome(a.getGenome());
+      //   System.out.println("Fitness = " + a.getFitness());
+      // }
+      // System.out.println("*************************");
+
       int toGenerate = s.getMembers().size();
       if (toGenerate >= 5) { // Really strong species so we want their best member still
         nextAgents.add(s.getStrongestMember().copy());
         toGenerate--;
       }
       // Only let the top 25% of parents survive
-      int survivingParents = (int) populationSurvivors * s.getMembers().size();
+      int survivingParents = (int) (populationSurvivors * s.getMembers().size());
+      //System.out.println("Surviving Parents " + populationSurvivors + " * " + s.getMembers().size());
       if (survivingParents < 1) {
         survivingParents = 1;
       }
@@ -61,6 +69,13 @@ public class NEAT {
           parents.add(possibleParent);
         }
       }
+
+      // System.out.println("Surviving members: ");
+      // for (Agent a : parents) {
+      //   Test.printGenome(a.getGenome());
+      //   System.out.println("Fitness = " + a.getFitness());
+      // }
+      // System.out.println("*************************");
 
       while(toGenerate > 0) {
         // Pick 2 random parents
@@ -314,10 +329,11 @@ public class NEAT {
     return maxFitness;
   }
 
-  private void printGeneration() {
+  public void printGeneration() {
     for (Species s : this.generation) {
       for (Agent a : s.getMembers()) {
         Test.printGenome(a.getGenome());
+        System.out.println("Fitness = " + a.getFitness());
       }
       System.out.println("*************************");
     }

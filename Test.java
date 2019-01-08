@@ -10,7 +10,7 @@ public class Test {
 
     NEAT test = new NEAT(100, 2, 1);
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 100; i++) {
       System.out.println("Generation " + (i+1));
       for (Agent a : test.getAgents()) {
         a.setFitness(10);
@@ -41,13 +41,15 @@ public class Test {
 
           }
 
+          //System.out.println("Off by " + Math.abs(guess - randomNumber));
           a.setFitness(a.getFitness() - Math.abs(guess - randomNumber));
 
         }
-        System.out.println("Had a fitness of " + a.getFitness());
-
+        //System.out.println("Had a fitness of " + a.getFitness());
+        //System.out.println(" ");
       }
       test.printBestGenome();
+      //test.printGeneration();
       test.generateNextGeneration();
     }
 //
