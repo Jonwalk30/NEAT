@@ -2,10 +2,11 @@ import java.util.*;
 
 
 // TODO: Inter-species mating 0.001 chance
-// TODO: Create a variable to return all of the nodes and connections of the Agents
 public class NEAT {
 
   private static float interSpeciesMating = 0.001f;
+  private static float populationSurvivors = 0.25f;
+
   private static float weightMutationProb = 0.8f;
   private static float shiftMutationProb = 0.9f;
   private static float flipMutationProb = 0.01f;
@@ -27,7 +28,7 @@ public class NEAT {
     r = new Random();
     this.generation = generateFirstGeneration(inputs, outputs);
     previousGenerations = new ArrayList<ArrayList<Species>>();
-    printGeneration();
+    //printGeneration();
   }
 
   public void generateNextGeneration() {
@@ -36,36 +37,54 @@ public class NEAT {
 
     // Crossover
     for (Species s : this.generation) {
+
       int toGenerate = s.getMembers().size();
       if (toGenerate >= 5) { // Really strong species so we want their best member still
         nextAgents.add(s.getStrongestMember().copy());
         toGenerate--;
       }
-      if (toGenerate == 1) { // Can't mate, only 1 in species
-        nextAgents.add(s.getStrongestMember().copy());
-      } else { // Regular species
-        while(toGenerate > 0) {
-          // Pick 2 random parents
-          Agent parent1 = s.getMembers().get(r.nextInt(s.getMembers().size()));
-          Agent parent2 = s.getMembers().get(r.nextInt(s.getMembers().size()));
-          while (parent1.getGenome() == parent2.getGenome()) {
-            parent2 = s.getMembers().get(r.nextInt(s.getMembers().size()));
-          }
-          // Swap so that the fitter parent goes first
-          if (parent2.getFitness() > parent1.getFitness()) {
-            Agent temp = parent1;
-            parent1 = parent2;
-            parent2 = temp;
-          }
-          // Mate them
-          Agent child = new Agent();
-          child.setGenome(Genome.createChild(parent1.getGenome(), parent2.getGenome(), r));
-          // Add to the list
-          nextAgents.add(child);
-          toGenerate--;
-        }
-        // TODO: Assign a mascot
+      // Only let the top 25% of parents survive
+      int survivingParents = (int) populationSurvivors * s.getMembers().size();
+      if (survivingParents < 1) {
+        survivingParents = 1;
       }
+      ArrayList<Agent> parents = new ArrayList<Agent>();
+
+      for (Agent possibleParent : s.getMembers()) {
+        int betterParents = 0;
+        for (Agent compParent : s.getMembers()) {
+          if (compParent.getFitness() > possibleParent.getFitness()) {
+            betterParents++;
+          }
+        }
+        if (betterParents < survivingParents) {
+          parents.add(possibleParent);
+        }
+      }
+
+      while(toGenerate > 0) {
+        // Pick 2 random parents
+        Agent parent1 = parents.get(r.nextInt(parents.size()));
+        Agent parent2 = parents.get(r.nextInt(parents.size()));
+        if (parents.size() > 1) {
+          while (parent1.getGenome() == parent2.getGenome()) {
+            parent2 = parents.get(r.nextInt(parents.size()));
+          }
+        }
+        // Swap so that the fitter parent goes first
+        if (parent2.getFitness() > parent1.getFitness()) {
+          Agent temp = parent1;
+          parent1 = parent2;
+          parent2 = temp;
+        }
+        // Mate them
+        Agent child = new Agent();
+        child.setGenome(Genome.createChild(parent1.getGenome(), parent2.getGenome(), r));
+        // Add to the list
+        nextAgents.add(child);
+        toGenerate--;
+      }
+      // TODO: Assign a mascot
     }
 
     // Mutations
@@ -91,7 +110,7 @@ public class NEAT {
 
     this.generation = nextGen;
     //System.out.println("Hello");
-    printGeneration();
+    //printGeneration();
   }
 
   private ArrayList<Species> generateFirstGeneration(Integer inputs, Integer outputs) {
@@ -282,6 +301,7 @@ public class NEAT {
       }
     }
     Test.printGenome(bestAgent.getGenome());
+    System.out.println("Fitness = " + bestAgent.getFitness());
   }
 
   public float getMaxFitness() {

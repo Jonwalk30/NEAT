@@ -10,24 +10,45 @@ public class Test {
 
     NEAT test = new NEAT(100, 2, 1);
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 1; i++) {
       System.out.println("Generation " + (i+1));
       for (Agent a : test.getAgents()) {
-        // TODO: Deal with edge cases like a non-float fitness
-        float number1 = (float) 50 / 100; //r.nextInt(100)
-        float number2 = (float) 50 / 100;
-        ArrayList<Float> inputs = new ArrayList<Float>();
-        inputs.add(number1);
-        inputs.add(number2);
-        float output = a.getGenome().calculateOutputs(inputs).get(0)*200;
-        System.out.println("Added " + number1*100 + " and " + number2*100 + " and got " + output);
-        a.setFitness(Math.abs((number1 + number2) - output));
-        //a.setFitness(r.nextFloat());
+        a.setFitness(10);
+        for (int j = 0; j < 10; j++) {
+
+          float highestNumber = 1f;
+          float lowestNumber = 0f;
+          float guess = 0f;
+
+          float randomNumber = r.nextFloat();
+
+          //System.out.println("The random number is " + randomNumber);
+
+          for (int k = 0; k < 3; k++) {
+
+            ArrayList<Float> inputs = new ArrayList<Float>();
+            inputs.add(highestNumber);
+            inputs.add(lowestNumber);
+
+            guess = a.getGenome().calculateOutputs(inputs).get(0);
+            //System.out.println("Round " + (k+1) + ", Guessed " + guess);
+
+            if (guess > randomNumber) {
+              highestNumber = guess;
+            } else {
+              lowestNumber = guess;
+            }
+
+          }
+
+          a.setFitness(a.getFitness() - Math.abs(guess - randomNumber));
+
+        }
+        System.out.println("Had a fitness of " + a.getFitness());
+
       }
+      test.printBestGenome();
       test.generateNextGeneration();
-
-
-
     }
 //
 //     EvolutionTracker nodeInnovation = new EvolutionTracker();
