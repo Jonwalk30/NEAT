@@ -38,6 +38,8 @@ public class NEAT {
     // Crossover
     for (Species s : this.generation) {
 
+      //printGeneration();
+
       // System.out.println("Species: ");
       // for (Agent a : s.getMembers()) {
       //   Test.printGenome(a.getGenome());
@@ -46,6 +48,7 @@ public class NEAT {
       // System.out.println("*************************");
 
       int toGenerate = s.getMembers().size();
+      //System.out.println("We need " + toGenerate + " members");
       if (toGenerate >= 5) { // Really strong species so we want their best member still
         nextAgents.add(s.getStrongestMember().copy());
         toGenerate--;
@@ -77,6 +80,9 @@ public class NEAT {
       // }
       // System.out.println("*************************");
 
+      //System.out.println("We now need " + toGenerate + " members because we have " + nextAgents.size() + " added already");
+      //System.out.println("We have " + parents.size() + " parents");
+
       while(toGenerate > 0) {
         // Pick 2 random parents
         Agent parent1 = parents.get(r.nextInt(parents.size()));
@@ -102,19 +108,35 @@ public class NEAT {
       // TODO: Assign a mascot
     }
 
+    //System.out.println("Done adding agents. There are now " + nextAgents.size() + " members");
+
+    // System.out.println("New Species");
+    // for (Agent a : nextAgents) {
+    //   System.out.println("I'm in the next gen and I look like: ");
+    //   Test.printGenome(a.getGenome());
+    // }
+
     // Mutations
     for (Agent a : nextAgents) {
-      if (r.nextFloat() < weightMutationProb) {
+      float mutationProb = r.nextFloat();
+      //System.out.println("R= " + mutationProb + " newShiftProb= " + weightMutationProb);
+      if (mutationProb < weightMutationProb) {
         a.getGenome().weightMutation(r, shiftMutationProb);
       }
-      if (r.nextFloat() < newNodeMutationProb) {
+      mutationProb = r.nextFloat();
+      //System.out.println("R= " + mutationProb + " newNodeProb= " + newNodeMutationProb);
+      if (mutationProb < newNodeMutationProb) {
         a.getGenome().addNodeMutation(r, nodeInnovationNumber, connectionInnovationNumber, this.getAllConnectionGenes());
       }
-      if (r.nextFloat() < newConnectionMutationProb) {
+      mutationProb = r.nextFloat();
+      //System.out.println("R= " + mutationProb + " newConProb= " + newConnectionMutationProb);
+      if (mutationProb < newConnectionMutationProb) {
         a.getGenome().addConnectionMutation(r, connectionInnovationNumber, this.getAllConnectionGenes());
       }
       // TODO: Flip mutation somehow
     }
+
+    //System.out.println("After mutations there are " + nextAgents.size() + " members");
 
     ArrayList<Species> nextGen = new ArrayList<Species>();
 
@@ -124,6 +146,10 @@ public class NEAT {
     previousGenerations.add(this.generation);
 
     this.generation = nextGen;
+
+    //System.out.println("Added them. There are " + this.getAgents().size() + " members in the next generation");
+
+    //printGeneration();
     //System.out.println("Hello");
     //printGeneration();
   }
@@ -157,6 +183,7 @@ public class NEAT {
         if (s.shouldContain(a)) { // Add the member to the species
           s.addMember(a);
           wasInSpecies = true;
+          break;
         }
       }
       if (!wasInSpecies) { // Create a new species, add the member and add the species to the generation
@@ -178,6 +205,8 @@ public class NEAT {
     // Just so the same agents aren't always the mascots
     Collections.shuffle(agents);
 
+    //System.out.println("Sorting " + agents.size() + " agents into species");
+
     ArrayList<Species> generation = new ArrayList<Species>();
     Species startingSpecies = new Species();
     boolean wasInSpecies;
@@ -192,16 +221,27 @@ public class NEAT {
       for (Species s : generation) {
         if (s.shouldContain(a)) { // Add the member to the species
           s.addMember(a);
+          //System.out.println("Adding a member to the species because they should be in there");
           wasInSpecies = true;
+          break;
         }
       }
       if (!wasInSpecies) { // Create a new species, add the member and add the species to the generation
         Species newSpecies = new Species();
+        //System.out.println("Creating a new species with its first member");
         newSpecies.addMember(a);
         newSpecies.setMascot(a);
         generation.add(newSpecies);
       }
     }
+
+    int agentCnt = 0;
+    for (Species s : generation) {
+      agentCnt += s.getMembers().size();
+      //System.out.println("We have a species with " + s.getMembers().size() + " members here");
+    }
+
+    //System.out.println("Sorted " + agentCnt + " agents into species");
 
     return generation;
   }

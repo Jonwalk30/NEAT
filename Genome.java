@@ -263,6 +263,9 @@ public class Genome {
     for (NodeGene node : parent1.getNodeGenes().values()) {
       child.addNodeGene(node.copy());
     }
+    for (NodeGene node : parent2.getNodeGenes().values()) {
+      child.addNodeGene(node.copy());
+    }
 
     // Add the connections from the appropriate parent to the child
     for (ConnectionGene con : parent1.getConnectionGenes().values()) {

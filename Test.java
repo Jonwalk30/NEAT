@@ -53,13 +53,43 @@ public class Test {
           a.setFitness(a.getFitness() - Math.abs(guess - randomNumber));
 
         }
-        //System.out.println("Had a fitness of " + a.getFitness());
+        System.out.println("Had a fitness of " + a.getFitness());
         //System.out.println(" ");
       }
-      //test.printBestGenome();
+      test.printBestGenome();
       //test.printGeneration();
-      test.generateNextGeneration();
+      if (i < 99) {
+        test.generateNextGeneration();
+      }
     }
+
+    float highestNumber = 1f;
+    float lowestNumber = 0f;
+    float guess = 0f;
+
+    float randomNumber = r.nextFloat();
+
+    System.out.println("The random number is " + randomNumber);
+
+    for (int k = 0; k < 3; k++) {
+
+      ArrayList<Float> inputs = new ArrayList<Float>();
+      inputs.add(highestNumber);
+      inputs.add(lowestNumber);
+
+      guess = test.getBestGenome().calculateOutputs(inputs).get(0);
+      System.out.println("Round " + (k+1) + ", Guessed " + guess);
+
+      if (guess > randomNumber) {
+        highestNumber = guess;
+      } else {
+        lowestNumber = guess;
+      }
+
+    }
+
+    System.out.println("Off by " + Math.abs(guess - randomNumber));
+
     try {
       saveGenome(test.getAgents().get(0).getGenome(), 100, test.getAgents().get(0).getFitness());
     }
