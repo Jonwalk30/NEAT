@@ -308,6 +308,16 @@ public class NEAT {
     return bestAgent.getGenome();
   }
 
+  public Agent getBestAgent() {
+    Agent bestAgent = new Agent();
+    for (Agent a : getAgents()) {
+      if (a.getFitness() > bestAgent.getFitness()) {
+        bestAgent = a;
+      }
+    }
+    return bestAgent;
+  }
+
   public void printBestGenome() {
     Agent bestAgent = new Agent();
     for (Agent a : getAgents()) {
