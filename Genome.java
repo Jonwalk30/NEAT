@@ -1,4 +1,5 @@
 import java.util.*;
+import java.lang.*;
 
 /*
 
@@ -20,7 +21,7 @@ With help from:
 public class Genome {
 
   private static int maxAttempts = 10000;
-  private static float shiftAmplitude = 0.1f;
+  private static float shiftAmplitude = 0.1f; // 0.1f
   private static float sigmoidModifier = 5.0f;
 
   private HashMap<Integer, ConnectionGene> connections;
@@ -163,7 +164,8 @@ public class Genome {
       // If the connection doesn't already exist
       if(!connectionExists(node1, node2)
         && node1.getInnovationNumber() != node2.getInnovationNumber()
-        && (node1.getType() != NodeGene.TYPE.INPUT || node2.getType() != NodeGene.TYPE.INPUT)) {
+        && (node1.getType() != NodeGene.TYPE.INPUT || node2.getType() != NodeGene.TYPE.INPUT)
+        && node1.getType() != NodeGene.TYPE.OUTPUT) {
 
         Integer newConInnovationNumber = 0;
         boolean isANewCon = true;
@@ -261,6 +263,9 @@ public class Genome {
     for (NodeGene node : parent1.getNodeGenes().values()) {
       child.addNodeGene(node.copy());
     }
+    for (NodeGene node : parent2.getNodeGenes().values()) {
+      child.addNodeGene(node.copy());
+    }
 
     // Add the connections from the appropriate parent to the child
     for (ConnectionGene con : parent1.getConnectionGenes().values()) {
@@ -293,12 +298,60 @@ public class Genome {
   }
 
   // TODO: Be able to calculate outputs, given inputs
-  // public ArrayList<float> calculateOutputs(ArrayList<float> inputs) {
-  //   ArrayList<float> forNow = new ArrayList<float>();
-  //   Random r = new Random();
-  //   forNow.add(r.nextFloat());
-  //   return forNow;
-  // }
+  // TODO: Add a check that the right amount of inputs have been given
+  // TODO: Make this depth first by swapping the order of the for loops (so that you find the value of all nodes i steps from an input)
+  public ArrayList<Float> calculateOutputs(ArrayList<Float> inputs) {
+
+    //ArrayList<ConnectionGene> coveredConnections = new ArrayList<ConnectionGene>();
+    HashMap<Integer, Float> nodeValues = new HashMap<Integer, Float>();
+    ArrayList<Float> outputValues = new ArrayList<Float>();
+
+    for (NodeGene node : nodes.values()) {
+      nodeValues.put(node.getInnovationNumber(), 0f);
+    }
+
+    for (NodeGene node : nodes.values()) {
+      if (node.getType() == NodeGene.TYPE.INPUT) {
+        // Set the node's value to input
+        nodeValues.put(node.getInnovationNumber(), inputs.get(node.getInnovationNumber()));
+        //System.out.println("Found an input node with innovationNumber " + node.getInnovationNumber() + ", storing the first input in here");
+        //System.out.println("nodeValues: " + nodeValues);
+      } else {
+        // Sigmoid calculation
+        float oldValue = nodeValues.get(node.getInnovationNumber());
+        float newValue = (float) 1 / (float) (1 + Math.pow((double) Math.E, (double) (-sigmoidModifier * oldValue)));
+        nodeValues.put(node.getInnovationNumber(), newValue);
+        //System.out.println("Using Sigmoid, calculated the value of the node with IN " + node.getInnovationNumber() + " to be " + newValue);
+        //System.out.println("nodeValues: " + nodeValues);
+      }
+      if (node.getType() == NodeGene.TYPE.OUTPUT) {
+        // If the type is output, add its value to the output list
+        outputValues.add(nodeValues.get(node.getInnovationNumber()));
+        //System.out.println("Found an output node with innovationNumber " + node.getInnovationNumber() + ", storing the first input in here");
+        //System.out.println("outputValues: " + outputValues);
+      } else {
+        for (ConnectionGene c : this.connections.values()) {
+          // Check if the connection has the current node as an input
+          if (c.getInNode() == node.getInnovationNumber()) {
+            //System.out.println("Found connection " + c.getInnovationNumber());
+            // If so make the value of the output node equal to the value that we assigned to the input node * the weight
+            // Also make the key equal to the innovationNumber of the node
+            NodeGene toNode = nodes.get(c.getOutNode());
+            //System.out.println(nodeValues);
+            //System.out.println(toNode.getInnovationNumber());
+            float value = nodeValues.get(toNode.getInnovationNumber());
+            //System.out.println("Doing calculation " + nodeValues.get(node.getInnovationNumber()) + " * " + c.getWeight());
+            value = value + (nodeValues.get(node.getInnovationNumber()) * c.getWeight());
+            nodeValues.put(toNode.getInnovationNumber(), value);
+            //System.out.println("Calculated the value of the node with IN " + toNode.getInnovationNumber() + " to be " + value);
+            //System.out.println("nodeValues: " + nodeValues);
+          }
+        }
+      }
+    }
+    //System.out.println(outputValues);
+    return outputValues;
+  }
 
   public Genome copy() {
     Genome g = new Genome();

@@ -8,7 +8,7 @@ public class Species implements CompatibilityDistanceCalculator {
   private static float c3 = 1f;
 
   // Compatibility Distance Cutoff
-  private static float delta = 3.0f;
+  private static float delta = 4.0f; // 3.0f
 
   private Agent mascot;
   private ArrayList<Agent> members;
